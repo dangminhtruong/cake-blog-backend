@@ -58,8 +58,7 @@ class PostsController extends AppController {
 		$this->Paginator->settings = $this->paginate;
 	}
 
-	public function index() {
-
+	public function index(){
 		$this->set([
 			'posts' => $this->Paginator->paginate($this->Post),
 			'maxPages' => $this->calculateMaxPage(),
@@ -91,9 +90,47 @@ class PostsController extends AppController {
 			throw new InternalErrorException();
 	}
 
+	public function edit($id){
+		try{
+			$data = $this->request->data;
+			switch($data['type']){
+				case 'title':
+					$this->updateTitle($id, $data);
+					break;
+				case 'avatar':
+					$this->updateAvata($id, $data);
+					break;
+				case 'description':
+					$this->updateDescription($id, $data);
+					break;
+				default:
+					throw new BadRequestException();
+			}
+			$this->set([
+				'message' => 'Succeed',
+				'_serialize' => ['message']
+			]);
+		}catch(\Exception $e){
+			throw new InternalErrorException();
+		}
+	}
+
+	protected function updateTitle($id, $data){
+		$this->Post->id = $id;
+		$this->Post->saveField('title', $data['content']);
+	}
+
+	protected function updateAvata($id, $data){
+		$this->Post->id = $id;
+		$this->Post->saveField('avatar', $data['content']);
+	}
+	protected function updateDescription($id, $data){
+		$this->Post->id = $id;
+		$this->Post->saveField('description', $data['content']);
+	}
+
 	protected function calculateMaxPage(){
 		$total = $this->Post->find('count');
 		return $total ? ceil($total / 3) : 1;
 	}
-
 }
