@@ -46,23 +46,54 @@ class PostsController extends AppController {
 	 */
 	public $components = ['RequestHandler', 'Paginator'];
 	public $paginate = [
-		'limit' => 2,
+		'limit' => 3,
 		'order' => [
-			'Post.id' => 'asc'
+			'Post.id' => 'desc'
 		],
 		'paramType' => 'querystring'
 	];
 
-	public function index() {
+	public function beforeFilter() {
+		parent::beforeFilter();
 		$this->Paginator->settings = $this->paginate;
-		$posts = $this->Paginator->paginate($this->Post);
-		$total = $this->Post->find('count');
-		$maxPages = $total ? ($total - 1) / 2 + 1 : 1;
+	}
+
+	public function index() {
 
 		$this->set([
-			'posts' => $posts,
-			'maxPages' => $maxPages,
+			'posts' => $this->Paginator->paginate($this->Post),
+			'maxPages' => $this->calculateMaxPage(),
 			'_serialize' => ['posts', 'maxPages']
 		]);
 	}
+
+	public function delete($id){
+		$message = $this->Post->delete($id) ? 'Deleted' : 'Error';
+
+		$this->set([
+			'posts' => $this->Paginator->paginate($this->Post),
+			'maxPages' => $this->calculateMaxPage(),
+			'message' => $message,
+			'_serialize' => ['message', 'posts', 'maxPages']
+		]);
+	}
+
+	public function add(){
+		$this->Post->create();
+		if($this->Post->save($this->request->data))
+			return $this->set([
+				'message' => 'Succeed',
+				'posts' => $this->Paginator->paginate($this->Post),
+				'maxPages' => $this->calculateMaxPage(),
+				'_serialize' => ['message', 'posts', 'maxPages']
+			]);
+		else
+			throw new InternalErrorException();
+	}
+
+	protected function calculateMaxPage(){
+		$total = $this->Post->find('count');
+		return $total ? ceil($total / 3) : 1;
+	}
+
 }

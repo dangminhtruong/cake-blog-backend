@@ -29,6 +29,23 @@ App::uses('Model', 'Model');
  *
  * @package       app.Model
  */
-class PostModel extends Model {
-	
+class Post extends Model {
+	public $validate = [
+		'title' => [
+			'rule' => 'notBlank',
+			'required' => true,
+			'message' => 'You have not entered title.'
+		],
+		'description' => [
+			'rule' => 'notBlank',
+			'required' => true,
+			'message' => 'You have not entered description.'
+		],
+
+		'content' => [
+			'rule' => 'notBlank',
+			'required' => true,
+			'message' => 'You have not entered content.'
+		]
+	];
 }
