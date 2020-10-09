@@ -111,6 +111,7 @@ class PostsController extends AppController {
 				'_serialize' => ['message']
 			]);
 		}catch(\Exception $e){
+			// Log $->getMessage();
 			throw new InternalErrorException();
 		}
 	}
